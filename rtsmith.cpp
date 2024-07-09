@@ -5,7 +5,6 @@
 #include <cstdlib>
 #include <filesystem>
 
-#include "backends/p4tools/common/compiler/context.h"
 #include "backends/p4tools/common/lib/logging.h"
 #include "backends/p4tools/modules/p4rtsmith/core/target.h"
 #include "backends/p4tools/modules/p4rtsmith/core/util.h"
@@ -44,15 +43,15 @@ int RtSmith::mainImpl(const CompilerResult &compilerResult) {
     printInfo("Inferred API:\n%1%", p4RuntimeApi.p4Info->DebugString());
 
     auto &fuzzer = RtSmithTarget::getFuzzer(*programInfo);
-    const auto &rtsmithOptions = RtSmithOptions::get();
+    const auto &rtSmithOptions = RtSmithOptions::get();
 
     auto initialConfig = fuzzer.produceInitialConfig();
     auto timeSeriesUpdates = fuzzer.produceUpdateTimeSeries();
 
-    if (rtsmithOptions.getConfigFilePath().has_value() &&
-        rtsmithOptions.getOutputDir().has_value()) {
-        auto dirPath = rtsmithOptions.getOutputDir().value();
-        auto fileName = rtsmithOptions.getConfigFilePath().value();
+    if (rtSmithOptions.getConfigFilePath().has_value() &&
+        rtSmithOptions.getOutputDir().has_value()) {
+        auto dirPath = rtSmithOptions.getOutputDir().value();
+        auto fileName = rtSmithOptions.getConfigFilePath().value();
 
         if (!(std::filesystem::exists(dirPath) && std::filesystem::is_directory(dirPath))) {
             if (!std::filesystem::create_directory(dirPath)) {
@@ -87,7 +86,7 @@ int RtSmith::mainImpl(const CompilerResult &compilerResult) {
         }
     }
 
-    if (rtsmithOptions.printToStdout()) {
+    if (rtSmithOptions.printToStdout()) {
         printInfo("Generated initial configuration:");
         for (const auto &writeRequest : initialConfig) {
             printInfo("%1%", writeRequest.DebugString());
@@ -109,23 +108,19 @@ std::optional<RtSmithResult> generateConfigImpl(
     registerRtSmithTargets();
 
     P4Tools::Target::init(compilerOptions.target.c_str(), compilerOptions.arch.c_str());
-
-    // Set up the compilation context.
-    auto *compileContext = new CompileContext<CompilerOptions>();
-    compileContext->options() = compilerOptions;
-    AutoCompileContext autoContext(compileContext);
-
     CompilerResultOrError compilerResult;
     if (program.has_value()) {
         // Run the compiler to get an IR and invoke the tool.
-        ASSIGN_OR_RETURN(compilerResult,
-                         P4Tools::CompilerTarget::runCompiler(TOOL_NAME, program.value().get()),
-                         std::nullopt);
+        ASSIGN_OR_RETURN(
+            compilerResult,
+            P4Tools::CompilerTarget::runCompiler(compilerOptions, TOOL_NAME, program.value().get()),
+            std::nullopt);
     } else {
         RETURN_IF_FALSE_WITH_MESSAGE(!compilerOptions.file.empty(), std::nullopt,
                                      ::error("Expected a file input."));
         // Run the compiler to get an IR and invoke the tool.
-        ASSIGN_OR_RETURN(compilerResult, P4Tools::CompilerTarget::runCompiler(TOOL_NAME),
+        ASSIGN_OR_RETURN(compilerResult,
+                         P4Tools::CompilerTarget::runCompiler(compilerOptions, TOOL_NAME),
                          std::nullopt);
     }
 

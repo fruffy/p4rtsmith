@@ -38,7 +38,7 @@ class RtSmithTarget : public CompilerTarget {
 
     explicit RtSmithTarget(const std::string &deviceName, const std::string &archName);
 
- private:
+    [[nodiscard]] ICompileContext *makeContext() const override;
 };
 
 }  // namespace P4Tools::RTSmith
