@@ -4,6 +4,8 @@
 #include <stdexcept>
 #include <vector>
 
+#include <toml++/toml.hpp>
+
 #include "backends/p4tools/common/lib/util.h"
 
 namespace P4::P4Tools::RTSmith {
@@ -44,6 +46,10 @@ class FuzzerConfig {
 
     // Default destructor.
     virtual ~FuzzerConfig() = default;
+
+    /// @brief Override the default fuzzer configurations through the TOML file.
+    /// @param path The path to the TOML file.
+    void override_fuzzer_configs(const char *path);
 
     /// Getters to access the fuzzer configurations.
     [[nodiscard]] int getMaxEntryGenCnt() const { return maxEntryGenCnt; }

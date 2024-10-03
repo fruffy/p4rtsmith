@@ -5,6 +5,7 @@
 #include <optional>
 
 #include "backends/p4tools/common/options.h"
+#include "backends/p4tools/modules/p4rtsmith/core/config.h"
 
 namespace P4::P4Tools::RTSmith {
 
@@ -39,6 +40,12 @@ class RtSmithOptions : public AbstractP4cToolOptions {
     /// @returns the control plane API to use.
     [[nodiscard]] std::string_view controlPlaneApi() const;
 
+    /// @returns the path to the TOML file that would be used to set the fuzzer configurations.
+    [[nodiscard]] std::optional<std::filesystem::path> fuzzerConfigPath() const;
+
+    /// @returns the FuzzerConfig object that would be used to set the fuzzer configurations.
+    [[nodiscard]] const FuzzerConfig &getFuzzerConfig() const;
+
  protected:
     // Write the generated config to the specified file.
     std::optional<std::string> _configName = std::nullopt;
@@ -57,6 +64,14 @@ class RtSmithOptions : public AbstractP4cToolOptions {
 
     // The control plane API to use. Defaults to P4Runtime.
     std::string _controlPlaneApi = "P4RUNTIME";
+
+    // The path to the TOML file that would be used to set the fuzzer configurations.
+    std::optional<std::filesystem::path> _fuzzerConfigPath = std::nullopt;
+
+    // The FuzzerConfig object that would be used to set the fuzzer configurations.
+    // Default values are provided in the FuzzerConfig class.
+    // Configurations from the TOML file could override these values.
+    FuzzerConfig _fuzzerConfig = FuzzerConfig();
 };
 
 }  // namespace P4::P4Tools::RTSmith

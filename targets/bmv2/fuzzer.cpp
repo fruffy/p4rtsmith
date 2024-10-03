@@ -20,14 +20,14 @@ InitialConfig Bmv2V1ModelFuzzer::produceInitialConfig() {
 
 UpdateSeries Bmv2V1ModelFuzzer::produceUpdateTimeSeries() {
     UpdateSeries updateSeries;
-    size_t maxUpdateCount = getProgramInfo().getFuzzerConfig().getMaxUpdateCount();
+    size_t maxUpdateCount = rtSmithOptions.getFuzzerConfig().getMaxUpdateCount();
     size_t updateCount = Utils::getRandInt(maxUpdateCount);
 
     for (size_t idx = 0; idx < updateCount; ++idx) {
         auto minUpdateTimeInMicroseconds =
-            getProgramInfo().getFuzzerConfig().getMinUpdateTimeInMicroseconds();
+            rtSmithOptions.getFuzzerConfig().getMinUpdateTimeInMicroseconds();
         auto maxUpdateTimeInMicroseconds =
-            getProgramInfo().getFuzzerConfig().getMaxUpdateTimeInMicroseconds();
+            rtSmithOptions.getFuzzerConfig().getMaxUpdateTimeInMicroseconds();
         auto microseconds =
             Utils::getRandInt(minUpdateTimeInMicroseconds, maxUpdateTimeInMicroseconds);
         updateSeries.emplace_back(microseconds, produceWriteRequest(false));
